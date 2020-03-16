@@ -135,9 +135,37 @@ class Graph:
         starting_vertex to destination_vertex in
         depth-first order.
         """
-        pass  # TODO
+        # Create an empty stack and push A PATH TO the starting vertex ID
+        s = Stack()
+        s.push([starting_vertex])
+        # Create a Set to store visited vertices
+        visited = set()
+        # While the stack is not empty...
+        while s.size() > 0:
+            # Pop the first PATH eg -> [a, b, c, r, g]
+            path = s.pop()
+        # Grab the last vertex from the PATH
+            vertex = path[-1]
+        # If that vertex has not been visited...
+            if vertex not in visited:
+                # CHECK IF IT'S THE TARGET
+                if vertex == destination_vertex:
+                    # IF SO, RETURN PATH
+                    return path
 
-    def dfs_recursive(self, starting_vertex):
+                # Mark it as visited...
+                visited.add(vertex)
+
+                # Then add A PATH TO its neighbors to the top of Stack
+                neighbors = self.get_neighbors(vertex)
+                for n in neighbors:
+                    # COPY THE PATH
+                    new_path = path.copy()
+                    # APPEND THE NEIGHOR TO THE BACK
+                    new_path.append(n)
+                    s.push(new_path)
+
+    def dfs_recursive(self, starting_vertex, destination_vertex):
         """
         Return a list containing a path from
         starting_vertex to destination_vertex in
@@ -145,7 +173,29 @@ class Graph:
 
         This should be done using recursion.
         """
-        pass  # TODO
+        s = Stack()
+        s.push([starting_vertex])
+        visited = set()
+
+        def recursion(stack):
+            if stack.size == 0:
+                return
+            else:
+                path = stack.pop()
+                vertex = path[-1]
+                print(vertex, "<<< vertex <<<")
+                if vertex not in visited:
+                    if vertex == destination_vertex:
+                        return path
+                    else:
+                        visited.add(vertex)
+                        neighbors = self.get_neighbors(vertex)
+                        for n in neighbors:
+                            new_path = path.copy()
+                            new_path.append(n)
+                            stack.push(new_path)
+                return recursion(stack)
+        return recursion(s)
 
 
 if __name__ == '__main__':
