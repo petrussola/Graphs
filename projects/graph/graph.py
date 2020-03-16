@@ -73,7 +73,25 @@ class Graph:
 
         This should be done using recursion.
         """
-        pass  # TODO
+        s = Stack()
+        visited = set()
+        s.push(starting_vertex)
+
+        def recursion(stack):
+            if stack.size() > 0:
+                vertice = stack.pop()
+                if vertice not in visited:
+                    visited.add(vertice)
+                    print(vertice)
+                    neighbors = self.get_neighbors(vertice)
+                    for n in neighbors:
+                        s.push(n)
+                recursion(s)
+            else:
+                return False
+        recursion(s)
+
+        return visited
 
     def bfs(self, starting_vertex, destination_vertex):
         """
