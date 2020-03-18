@@ -54,7 +54,7 @@ class SocialGraph:
         for i in range(0, num_users):
             # add user using an f-string
             self.add_user(f'User {i}')
-        
+
         # Create friendships
         # generate all possible friendship combinations
         possible_friendships = []
@@ -102,16 +102,33 @@ class SocialGraph:
             if v not in visited:
                 visited[v] = path
                 for neighbor in self.friendships[v]:
-                    new_path =list(path)
+                    new_path = list(path)
                     new_path.append(neighbor)
                     q.enqueue(new_path)
+        ext_network = []
+        # [degree of separation, count of extended networks]
+        separation = [0, 0]
+        for el in visited:
+            if len(visited[el]) > 2:
+                separation[0] += len(visited[el]) - 2
+                separation[1] += 1
+            for i in range(len(visited[el])):
+                if visited[el][i] not in ext_network:
+                    ext_network.append(visited[el][i])
 
+        # print
+        print(ext_network, "<<< extended network <<<")
+        print(len(ext_network), "<<< lenght of extended network <<<")
+        print(self.last_id, "<<< number of users <<<")
+        print((len(ext_network) / self.last_id)*100,
+              "<<< % of users in extended network <<<")
+        print(separation[0]/separation[1], "<<< average degree of separation <<<")
         return visited
 
 
 if __name__ == '__main__':
     sg = SocialGraph()
-    sg.populate_graph(10, 2)
-    print(sg.friendships)
+    sg.populate_graph(1000, 5)
+    # print(sg.friendships)
     connections = sg.get_all_social_paths(1)
-    print(connections)
+    # print(connections)
