@@ -15,6 +15,7 @@ class World:
         for i in range(0, num_rooms):
             x = room_graph[i][0][0]
             grid_size = max(grid_size, room_graph[i][0][0], room_graph[i][0][1])
+            # print(grid_size, "<<< grid size <<<")
             self.rooms[i] = Room(f"Room {i}", f"({room_graph[i][0][0]},{room_graph[i][0][1]})",i, room_graph[i][0][0], room_graph[i][0][1])
         self.room_grid = []
         grid_size += 1
