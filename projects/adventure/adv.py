@@ -13,9 +13,9 @@ world = World()
 
 # You may uncomment the smaller graphs for development and testing purposes.
 # map_file = "maps/test_line.txt"
-map_file = "maps/test_cross.txt"
+# map_file = "maps/test_cross.txt"
 # map_file = "maps/test_loop.txt"
-# map_file = "maps/test_loop_fork.txt"
+map_file = "maps/test_loop_fork.txt"
 # map_file = "maps/main_maze.txt"
 
 # Loads the map into a dictionary
@@ -52,46 +52,48 @@ reverse = []
 # [(direction, prev room), current_room]
 s.push([[[None, None], player.current_room]])
 while s.size() > 0:
-    path = s.pop()
-    room = path[-1][1]
-    print(room.id, "<<<< room")
-    incoming_direction = path[-1][0][0]
-    prev_room = path[-1][0][1]
-    # print(path[-1][0][0], "<<<<< rooom")
-    directions = room.get_exits()
-    if room.id not in graph.vertices:
-        graph.add_vertex(room.id)
-        for d in directions:
-            graph.vertices[room.id][d] = "?"
-        if incoming_direction != None:
-            opposite_direction = options[incoming_direction]
-            graph.vertices[room.id][opposite_direction] = prev_room.id
-            graph.vertices[prev_room.id][incoming_direction] = room.id
+    if len(graph.vertices) != len(room_graph):
+        path = s.pop()
+        room = path[-1][1]
+        print(room.id, "<<<< room")
+        incoming_direction = path[-1][0][0]
+        prev_room = path[-1][0][1]
+        # print(path[-1][0][0], "<<<<< rooom")
+        directions = room.get_exits()
+        if room.id not in graph.vertices:
+            graph.add_vertex(room.id)
+            for d in directions:
+                graph.vertices[room.id][d] = "?"
+            if incoming_direction != None:
+                opposite_direction = options[incoming_direction]
+                graph.vertices[room.id][opposite_direction] = prev_room.id
+                graph.vertices[prev_room.id][incoming_direction] = room.id
 
-    unexplored_dir = []
-    explored_dir = []
-    for d in graph.vertices[room.id]:
-        if graph.vertices[room.id][d] == "?":
-            unexplored_dir.append(d)
+        unexplored_dir = []
+        explored_dir = []
+        for d in graph.vertices[room.id]:
+            if graph.vertices[room.id][d] == "?":
+                unexplored_dir.append(d)
+            else:
+                explored_dir.append(d)
+        if len(unexplored_dir) > 0:
+            next_dir = get_random_direction(unexplored_dir)
+            player.travel(next_dir)
+            traversal_path.append(next_dir)
+            new_path = list(path)
+            new_path.append([[next_dir, room], player.current_room])
+            s.push(new_path)
+        # otherwise go back
         else:
-            explored_dir.append(d)
-    if len(unexplored_dir) > 0:
-        next_dir = get_random_direction(unexplored_dir)
-        player.travel(next_dir)
-        traversal_path.append(next_dir)
-        new_path = list(path)
-        new_path.append([[next_dir, room], player.current_room])
-        s.push(new_path)
-    # otherwise go back
-    else:
-        if len(graph.vertices) != len(room_graph):
             next_dir = get_random_direction(explored_dir)
             player.travel(next_dir)
             traversal_path.append(next_dir)
             new_path = list(path)
             new_path.append([[next_dir, room], player.current_room])
             s.push(new_path)
-        
+    else:
+        while s.size() > 0:
+            s.pop()
 
 
 print(graph.vertices, "<<<< vertices <<<<")
