@@ -1,7 +1,8 @@
 from room import Room
 from player import Player
 from world import World
-from util import Queue
+from util import Stack
+from graph import Graph
 
 import random
 from ast import literal_eval
@@ -11,8 +12,8 @@ world = World()
 
 
 # You may uncomment the smaller graphs for development and testing purposes.
-map_file = "maps/test_line.txt"
-# map_file = "maps/test_cross.txt"
+# map_file = "maps/test_line.txt"
+map_file = "maps/test_cross.txt"
 # map_file = "maps/test_loop.txt"
 # map_file = "maps/test_loop_fork.txt"
 # map_file = "maps/main_maze.txt"
@@ -31,39 +32,70 @@ player = Player(world.starting_room)
 # traversal_path = ['n', 'n']
 traversal_path = []
 
-# test_line.txt map
 
-# create Queue
-q = Queue()
-# create visited (will store room ids)
-visited = []
-# enqueue current room path to the queue
-q.enqueue([player.current_room])
-# print(player.current_room.id, "<<< current room <<<")
-# while queue is not empty
-while q.size() > 0:
-    # dequeue path from queue
-    path = q.dequeue()
-    # get the last direction in the path
-    room = path[-1]
-    # print(room.name, "<<< room id <<<")
-    # if room not in visited:
-    if room.id not in visited:
-        # add room_id to visited
-        visited.append(room.id)
-        # get exits from current room and iterate over them
-        directions = player.current_room.get_exits()
+def get_random_direction(available_directions):
+    numb = random.randrange(0, len(available_directions))
+    print(available_directions[numb], "<<< numb")
+    return available_directions[numb]
+
+
+graph = Graph()
+
+options = {
+    'n': 's',
+    's': 'n',
+    'e': 'w',
+    'w': 'e'
+}
+s = Stack()
+reverse = []
+# [(direction, prev room), current_room]
+s.push([[[None, None], player.current_room]])
+while s.size() > 0:
+    path = s.pop()
+    room = path[-1][1]
+    print(room.id, "<<<< room")
+    incoming_direction = path[-1][0][0]
+    prev_room = path[-1][0][1]
+    # print(path[-1][0][0], "<<<<< rooom")
+    directions = room.get_exits()
+    if room.id not in graph.vertices:
+        graph.add_vertex(room.id)
         for d in directions:
-            # travel in d direction (this will set the current room)
-            player.travel(d)
-            # add direction to the traversal_path list
-            traversal_path.append(d)
-            # create new path
+            graph.vertices[room.id][d] = "?"
+        if incoming_direction != None:
+            opposite_direction = options[incoming_direction]
+            graph.vertices[room.id][opposite_direction] = prev_room.id
+            graph.vertices[prev_room.id][incoming_direction] = room.id
+
+    unexplored_dir = []
+    explored_dir = []
+    for d in graph.vertices[room.id]:
+        if graph.vertices[room.id][d] == "?":
+            unexplored_dir.append(d)
+        else:
+            explored_dir.append(d)
+    if len(unexplored_dir) > 0:
+        next_dir = get_random_direction(unexplored_dir)
+        player.travel(next_dir)
+        traversal_path.append(next_dir)
+        new_path = list(path)
+        new_path.append([[next_dir, room], player.current_room])
+        s.push(new_path)
+    # otherwise go back
+    else:
+        if len(graph.vertices) != len(room_graph):
+            next_dir = get_random_direction(explored_dir)
+            player.travel(next_dir)
+            traversal_path.append(next_dir)
             new_path = list(path)
-            # add current room to the new path
-            new_path.append(player.current_room)
-            # add new path in queue
-            q.enqueue(new_path)
+            new_path.append([[next_dir, room], player.current_room])
+            s.push(new_path)
+        
+
+
+print(graph.vertices, "<<<< vertices <<<<")
+print(traversal_path, "<<< path <<<")
 
 # TRAVERSAL TEST
 visited_rooms = set()
