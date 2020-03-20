@@ -15,8 +15,8 @@ world = World()
 # map_file = "maps/test_line.txt"
 # map_file = "maps/test_cross.txt"
 # map_file = "maps/test_loop.txt"
-map_file = "maps/test_loop_fork.txt"
-# map_file = "maps/main_maze.txt"
+# map_file = "maps/test_loop_fork.txt"
+map_file = "maps/main_maze.txt"
 
 # Loads the map into a dictionary
 room_graph = literal_eval(open(map_file, "r").read())
@@ -33,9 +33,15 @@ player = Player(world.starting_room)
 traversal_path = []
 
 
-def get_random_direction(available_directions):
+def get_random_direction(available_directions, current_room, mess, length, graph):
     numb = random.randrange(0, len(available_directions))
-    print(available_directions[numb], "<<< numb")
+    # print(mess, "<<<< type of call")
+    # print(current_room, "<<<< current room <<<")
+    # print(available_directions, "<<< available directions")
+    # print(available_directions[numb], "<<< next direction")
+    # print(length, "<<< len(graph.vertices)")
+    # print(graph, "<<< len(room_graph)")
+    # print("---------------------------------------")
     return available_directions[numb]
 
 
@@ -47,15 +53,12 @@ options = {
     'e': 'w',
     'w': 'e'
 }
-s = Stack()
-reverse = []
-# [(direction, prev room), current_room]
+s = Stack() # [(direction, prev room), current_room]
 s.push([[[None, None], player.current_room]])
 while s.size() > 0:
     if len(graph.vertices) != len(room_graph):
         path = s.pop()
         room = path[-1][1]
-        print(room.id, "<<<< room")
         incoming_direction = path[-1][0][0]
         prev_room = path[-1][0][1]
         # print(path[-1][0][0], "<<<<< rooom")
@@ -64,10 +67,10 @@ while s.size() > 0:
             graph.add_vertex(room.id)
             for d in directions:
                 graph.vertices[room.id][d] = "?"
-            if incoming_direction != None:
-                opposite_direction = options[incoming_direction]
-                graph.vertices[room.id][opposite_direction] = prev_room.id
-                graph.vertices[prev_room.id][incoming_direction] = room.id
+        if incoming_direction != None:
+            opposite_direction = options[incoming_direction]
+            graph.vertices[room.id][opposite_direction] = prev_room.id
+            graph.vertices[prev_room.id][incoming_direction] = room.id
 
         unexplored_dir = []
         explored_dir = []
@@ -77,7 +80,8 @@ while s.size() > 0:
             else:
                 explored_dir.append(d)
         if len(unexplored_dir) > 0:
-            next_dir = get_random_direction(unexplored_dir)
+            next_dir = get_random_direction(
+                unexplored_dir, room.id, "unexplored", len(graph.vertices), len(room_graph))
             player.travel(next_dir)
             traversal_path.append(next_dir)
             new_path = list(path)
@@ -85,7 +89,8 @@ while s.size() > 0:
             s.push(new_path)
         # otherwise go back
         else:
-            next_dir = get_random_direction(explored_dir)
+            next_dir = get_random_direction(
+                explored_dir, room.id, "backing up", len(graph.vertices), len(room_graph))
             player.travel(next_dir)
             traversal_path.append(next_dir)
             new_path = list(path)
@@ -96,8 +101,8 @@ while s.size() > 0:
             s.pop()
 
 
-print(graph.vertices, "<<<< vertices <<<<")
-print(traversal_path, "<<< path <<<")
+# print(graph.vertices, "<<<< vertices <<<<")
+# print(traversal_path, "<<< path <<<")
 
 # TRAVERSAL TEST
 visited_rooms = set()
