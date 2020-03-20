@@ -34,7 +34,8 @@ traversal_path = []
 
 
 def get_random_direction(available_directions, current_room, mess, length, graph):
-    numb = random.randrange(0, len(available_directions))
+    if len(available_directions) > 0:
+        numb = random.randrange(0, len(available_directions))
     # print(mess, "<<<< type of call")
     # print(current_room, "<<<< current room <<<")
     # print(available_directions, "<<< available directions")
@@ -42,10 +43,18 @@ def get_random_direction(available_directions, current_room, mess, length, graph
     # print(length, "<<< len(graph.vertices)")
     # print(graph, "<<< len(room_graph)")
     # print("---------------------------------------")
-    return available_directions[numb]
+        return available_directions[numb]
+    else:
+        dir = []
+        directions = current_room.get_exits()
+        for d in directions:
+            dir.append(dir)
+        numb = random.randrange(0, len(dir))
+        return dir[numb]
 
 
 graph = Graph()
+used_directions = {}
 
 options = {
     'n': 's',
@@ -53,7 +62,7 @@ options = {
     'e': 'w',
     'w': 'e'
 }
-s = Stack() # [(direction, prev room), current_room]
+s = Stack()  # [(direction, prev room), current_room]
 s.push([[[None, None], player.current_room]])
 while s.size() > 0:
     if len(graph.vertices) != len(room_graph):
@@ -74,14 +83,26 @@ while s.size() > 0:
 
         unexplored_dir = []
         explored_dir = []
+        # print(used_directions, "<<<<<<<< used directions")
+        # print(room.id, "<<<<<<<< used directions")
         for d in graph.vertices[room.id]:
+            # print(d, "<<<< directions")
             if graph.vertices[room.id][d] == "?":
                 unexplored_dir.append(d)
-            else:
+            if room.id not in used_directions or d not in used_directions[room.id]:
                 explored_dir.append(d)
+            # else:
+            #     explored_dir.append(d)
+        # print(unexplored_dir, "<<<< unexplored dir")
+        # print(explored_dir, "<<<< explored dir")
         if len(unexplored_dir) > 0:
             next_dir = get_random_direction(
-                unexplored_dir, room.id, "unexplored", len(graph.vertices), len(room_graph))
+                unexplored_dir, room, "unexplored", len(graph.vertices), len(room_graph))
+            if room.id not in used_directions:
+                used_directions[room.id] = set()
+            used_directions[room.id].add(next_dir)
+            # else:
+            #     used_directions[room.id].add(next_dir)
             player.travel(next_dir)
             traversal_path.append(next_dir)
             new_path = list(path)
@@ -90,7 +111,10 @@ while s.size() > 0:
         # otherwise go back
         else:
             next_dir = get_random_direction(
-                explored_dir, room.id, "backing up", len(graph.vertices), len(room_graph))
+                explored_dir, room, "backing up", len(graph.vertices), len(room_graph))
+            if room.id not in used_directions:
+                used_directions[room.id] = set()
+            used_directions[room.id].add(next_dir)
             player.travel(next_dir)
             traversal_path.append(next_dir)
             new_path = list(path)

@@ -116,7 +116,7 @@ class SocialGraph:
                 if visited[el][i] not in ext_network:
                     ext_network.append(visited[el][i])
 
-        # print
+        print
         print(ext_network, "<<< extended network <<<")
         print(len(ext_network), "<<< lenght of extended network <<<")
         print(self.last_id, "<<< number of users <<<")
